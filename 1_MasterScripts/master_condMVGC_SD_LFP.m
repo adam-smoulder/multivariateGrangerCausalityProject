@@ -147,48 +147,52 @@ disp('Plot for figures')
 switch domain
     case 'SD'
         axisLimit = 1;
+        axisLimitString = '1';
     case 'TD'
         axisLimit = 0.2;
+        axisLimitString = '0p2';
     case 'TDBySum'
         axisLimit = 1500;
+        axisLimitString = '1500';
     otherwise
         axisLimit = 0;
+        axisLimitString = '0';
 end
-firstAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',num2str(axisLimit)];
+firstAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimitString];
 eval(['mkdir ',firstAxisLimitFolderString]);
 
 % combined figures, intarg, axisLimit = 1
 disp('...')
-disp(['intarg, max axis GC = ', num2str(axisLimit)])
+disp(['intarg, max axis GC = ', axisLimitString])
 saccFileString = inTarg_SaccFileString; % Or whatever the name is in the script
 targFileString = inTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(1);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,num2str(axisLimit)];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
 clf
 close all
 
 % combined figures, outtarg, axisLimit = 1
 disp('...')
-disp(['outtarg, max axis GC = ', axisLimit])
+disp(['outtarg, max axis GC = ', axisLimitString])
 saccFileString = outTarg_SaccFileString;
 targFileString = outTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(0);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
 clf
 close all
 
 % combined figures, in-out, axisLimit = 1
 disp('...')
-disp(['in-out, max axis GC = ', axisLimit])
+disp(['in-out, max axis GC = ', axisLimitString])
 saccFileString = inMinusOutTarg_SaccFileString;
 targFileString = inMinusOutTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(42);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,num2str(axisLimit)];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
 clf 
 close all
@@ -199,48 +203,52 @@ close all
 switch domain
     case 'SD'
         axisLimit = 0.5;
+        axisLimitString = '0p5';
     case 'TD'
         axisLimit = 0.1;
+        axisLimitString = '0p1';
     case 'TDBySum'
         axisLimit = 700;
+        axisLimitString = '700';
     otherwise
         axisLimit = 0;
+        axisLimitString = '0';
 end
-endsecondAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',num2str(axisLimit)];
+secondAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimitString];
 eval(['mkdir ',secondAxisLimitFolderString]);
 
 % combined figures, intarg, axisLimit = 0.5
 disp('...')
-disp(['intarg, max axis GC = ', num2str(axisLimit)])
+disp(['intarg, max axis GC = ', axisLimitString])
 saccFileString = inTarg_SaccFileString;
 targFileString = inTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(1);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,num2str(axisLimit)];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
 clf
 close all
 
 % combined figures, outtarg, axisLimit = 0.5
 disp('...')
-disp(['outtarg, max axis GC = ', num2str(axisLimit)])
+disp(['outtarg, max axis GC = ', axisLimitString])
 saccFileString = outTarg_SaccFileString;
 targFileString = outTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(0);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,num2str(axisLimit)];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
 clf
 close all
 
 % combined figures, in-out, axisLimit = 0.5
 disp('...')
-disp(['in-out, max axis GC = ', num2str(axisLimit)])
+disp(['in-out, max axis GC = ', axisLimitString])
 saccFileString = inMinusOutTarg_SaccFileString;
 targFileString = inMinusOutTarg_TargFileString;
 performCombinedPlot;
 inTargString = getInTargString(42);
-fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,num2str(axisLimit)];
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
 clf
 close all
