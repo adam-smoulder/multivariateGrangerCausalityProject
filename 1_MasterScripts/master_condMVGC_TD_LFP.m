@@ -25,7 +25,7 @@
 
 % variables
 analysisType = 'cond';              % 'cond' = conditional, 'pw' = pairwise
-monkey_date = 'bl_sc_072315_1';       % experiment, used for saving
+monkey_date = 'bb_sc_080415';       % experiment, used for saving
 signalType = 'lfp';                 % 'lfp' or 'spikes'
 domain = 'TD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
 channelsToUse = [1 3; 5 7; 9 11];   % superficial ; mid ; deep - change all depending on experiment
