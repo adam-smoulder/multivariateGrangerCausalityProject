@@ -15,13 +15,13 @@ if exist('targFileString', 'var') == 0
 end
 
 % load saccade event data
-load(strcat(saccFileString, '.mat'), 'specGC');
-specGC_sacc = specGC;
+load(strcat(saccFileString, '.mat'), 'gc');
+specGC_sacc = gc;
 saccMax = greatestMax(specGC_sacc);
 
 % load target event data
-load(strcat(targFileString, '.mat'), 'specGC');
-specGC_targ = specGC;
+load(strcat(targFileString, '.mat'), 'gc');
+specGC_targ = gc;
 targMax = greatestMax(specGC_targ);
 
 numVar = size(specGC_targ,2);
