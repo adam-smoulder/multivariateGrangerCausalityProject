@@ -3,6 +3,7 @@
 % - load paths to these files
 % - run this file!
 
+% ADAM UPDATE THIS SO THAT IT WORKS WITH THE NEW STUFF!!!!
 %% load data
 if exist('inTargFileString','var') == 0
     inTargFileString = 'time_sacclfp_bb_080415_intarg'; % these will need updated
@@ -17,7 +18,7 @@ end
 % example file names:
 % saccLFP_080415_A_all
 % pairwiseTarg_intarg
-load(strcat(inTargFileString,'.mat'),'gc')
+load(strcat(inTargFileString),'gc')
 timeGC_in = gc;
 
 load(strcat(outTargFileString,'.mat'),'gc')
