@@ -1,192 +1,246 @@
-%% Conditional MVGC combined script
-% Last update: 6/7/17
+%% Conditional MVGC Spectral Domain combined script for LFP-LFP interactions
+% Last update: 7/26/17
 
-% TODO: Update variable names for different cues, check on subtractorExtractor_TimeDomain, 
-% update plotForFigure_TimeDomain, figure out saves in here, automate enlarge of final
-% figures and save as tif, clean up variables here as a whole
+% TODO: automate enlarge of final figures and save as tif, clean up variables
 
-% load data before running
+% To run this script, do the following:
+% startup MVGC
+% set channels to use accordingly
+% ensure you wish to run conditional MVGC in spectral domain
 
-% channels:
-% bad channels for bb 031315: 11, 14
-% bad channels for bb 070915: 2, 7, 11, 14
-% bad channels for bb 071215: 11, 14
-% bad channels for bb 080415: none
-% bad channels for bl 031115: 2, 7, 11, 14
-% bad channels for bl 071415: 2, 7, 11, 14
-% bad channels for bl 072315_1: none
-% bad channels for bl 072315_2: none
-% bad channels for bl 112515: none
+% BAD channels by dataset (do NOT use these):
+% bb 031315: 11, 14
+% bb 070915: 2, 7, 11, 14
+% bb 071215: 11, 14
+% bb 080415: none
+% bl 031115: 2, 7, 11, 14
+% bl 071415: 2, 7, 11, 14
+% bl 072315_1: none
+% bl 072315_2: none
+% bl 112515: none
 
 % typically use [1 3; 5 7; 9 11] if none bad
 
-clc
-disp('Check data is loaded and filenames are clear! (press any key to cont.)')
-pause();
-monkey_Date = 'bb_080415'; % experiment, used for saving, still need to load data manually
-channelsToUse = [1 3; 5 7; 9 11]; % superficial ; mid ; deep
- 
+%% Setup
 
-%% MVGC to get GC for intarg, outtarg, and in-out for sacc and targ
+% variables
+analysisType = 'cond';              % 'cond' = conditional, 'pw' = pairwise
+monkey_date = 'bb_sc_080415';       % experiment, used for saving
+signalType = 'lfp';                 % 'lfp' or 'spikes'
+domain = 'TDBySum';                 % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
+channelsToUse = [1 3; 5 7; 9 11];   % superficial ; mid ; deep - change all depending on experiment
+demeanTrialAvg = 0;                 % 0 = do not demean data by trial avg, 1 = do so
+axisLimit = 0;                      % if 0, axisLimit = maxGC (only used for subtractorExtractor)
+
+% add file paths (only run within 1_MasterScripts folder)
+cd .. % you are now located in Project folder after this line!!!
+projectRoot = pwd;
+addpath(genpath(projectRoot)); % adds all needed scripts/functions to file path
+demeaned = ternaryOp(demeanTrialAvg, '_demeaned','');
+
+clc % make sure you're clear before pulling the trigger!
+disp('Check data is clear (or properly loaded) and filenames are clear! (press any key to cont.)')
+pause();
+if exist('data','var') == 0
+    load(['4_Data/',monkey_date,'_mcell_spikelfp_cSC']);
+end
+disp('Check channels are correct! (press any key to cont.)')
+pause();
+ 
+%% MVGC to get SD GC for intarg, outtarg, and in-out for sacc and targ
 
 % saccade, intarg
 disp('...')
 disp('saccade, intarg')
-cueString = 'sacclfp';
+cueType = 'saccade';
+cueString = getCueString(cueType,signalType); % used by MVGC scripts
+
 inTargVal = 1;
-MVGC_TimeDomain_OtherWay;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_intarg'));
+inTargString = getInTargString(inTargVal);
+inTarg_SaccFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',inTarg_SaccFolderName]);
+performMVGC;
+saveas(figure(66), [inTarg_SaccFolderName,'/',inTarg_SaccFileString]);
 clf 
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_intarg'));
-cd AlteredScripts
+save([inTarg_SaccFolderName,'/',inTarg_SaccFileString]);
 
 % saccade, outtarg
 disp('...')
 disp('saccade, outtarg')
 inTargVal = 0;
-MVGC_TimeDomain_OtherWay;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_outtarg'));
+inTargString = getInTargString(inTargVal);
+outTarg_SaccFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+outTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+eval(['mkdir ',outTarg_SaccFolderName]);
+performMVGC;
+saveas(figure(66), [outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
 clf 
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_outtarg'));
-cd AlteredScripts
+save([outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
 
 % saccade, in - out
 disp('...')
 disp('saccade, in - out')
-inTargFileString = strcat('2time_',cueString,'_',monkey_Date,'_intarg');
-outTargFileString = strcat('2time_',cueString,'_',monkey_Date,'_outtarg');
-subtractorExtractor_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_in-out'));
-clf 
+inMinusOutTarg_SaccFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+eval(['mkdir ',inMinusOutTarg_SaccFolderString]);
+inTargFileString = [inTarg_SaccFolderName,'/',inTarg_SaccFileString,'.mat'];
+outTargFileString = [outTarg_SaccFolderName,'/',outTarg_SaccFileString,'.mat'];
+performGCSubtraction;
+saveas(figure(66), [inMinusOutTarg_SaccFolderString,'/',inMinusOutTarg_SaccFileString]); % save figure
+clf
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_in-out'));
-cd AlteredScripts
+save([inMinusOutTarg_SaccFolderString,'/',inMinusOutTarg_SaccFileString]); % save data
 
 % target, intarg
 disp('...')
-disp('target, intarg');
-cueString = 'targlfp';
+disp('target, intarg')
+cueType = 'target';
+cueString = getCueString(cueType,signalType);
+
 inTargVal = 1;
-MVGC_TimeDomain_OtherWay;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_intarg'));
+inTargString = getInTargString(inTargVal);
+inTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+eval(['mkdir ',inTarg_TargFolderName]);
+performMVGC;
+saveas(figure(66), [inTarg_TargFolderName,'/',inTarg_TargFileString]);
 clf 
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_intarg'));
-cd AlteredScripts
+save([inTarg_TargFolderName,'/',inTarg_TargFileString]);
 
 % target, outtarg
 disp('...')
 disp('target, outtarg')
 inTargVal = 0;
-MVGC_TimeDomain_OtherWay;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_outtarg'));
+inTargString = getInTargString(inTargVal);
+outTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+outTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+eval(['mkdir ',outTarg_TargFolderName]);
+performMVGC;
+saveas(figure(66), [outTarg_TargFolderName,'/',outTarg_TargFileString]);
 clf 
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_outtarg'));
-cd AlteredScripts
+save([outTarg_TargFolderName,'/',outTarg_TargFileString]);
 
 % target, in - out
 disp('...')
-disp('target, in-out')
-inTargFileString = strcat('2time_',cueString,'_',monkey_Date,'_intarg');
-outTargFileString = strcat('2time_',cueString,'_',monkey_Date,'_outtarg');
-subtractorExtractor_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_in-out'));
+disp('target, in - out')
+inMinusOutTarg_TargFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+eval(['mkdir ',inMinusOutTarg_TargFolderString]);
+inTargFileString = [inTarg_TargFolderName,'/',inTarg_TargFileString,'.mat'];
+outTargFileString = [outTarg_TargFolderName,'/',outTarg_TargFileString,'.mat'];
+performGCSubtraction;
+saveas(figure(66), [inMinusOutTarg_TargFolderString,'/',inMinusOutTarg_TargFileString]);
 clf 
 close all
-save(strcat('adamFigsAndData/IndividualCues/conditional/~timeDomain/',cueString,'/2time_',cueString,'_',monkey_Date,'_in-out'));
-cd AlteredScripts
+save([inMinusOutTarg_TargFolderString,'/',inMinusOutTarg_TargFileString]);
+
 
 %% Combined figure plots
-% make folders for combined figures
+% make folders for combined figures, axisLimit = 1
 disp('...')
 disp('Plot for figures')
-eval(strcat('mkdir ../adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date));
-maxAxisOverride = 700;
-eval(strcat('mkdir ../adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit'));
+switch domain
+    case 'SD'
+        axisLimit = 1;
+    case 'TD'
+        axisLimit = 0.2;
+    case 'TDBySum'
+        axisLimit = 1500;
+    otherwise
+        axisLimit = 0;
+end
+firstAxisLimitFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
+eval(['mkdir ',firstAxisLimitFolderString]);
 
-% combined figures, intarg, maxAxisOverride = 1
+% combined figures, intarg, axisLimit = 1
 disp('...')
-disp(strcat('intarg, max axis GC = ',num2str(maxAxisOverride)))
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_intarg');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_intarg');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_intarg'));
+disp(['intarg, max axis GC = ', axisLimit])
+saccFileString = inTarg_SaccFileString; % Or whatever the name is in the script
+targFileString = inTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(1);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+clf
+close all
+
+% combined figures, outtarg, axisLimit = 1
+disp('...')
+disp(['outtarg, max axis GC = ', axisLimit])
+saccFileString = outTarg_SaccFileString;
+targFileString = outTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(0);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+clf
+close all
+
+% combined figures, in-out, axisLimit = 1
+disp('...')
+disp(['in-out, max axis GC = ', axisLimit])
+saccFileString = inMinusOutTarg_SaccFileString;
+targFileString = inMinusOutTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(42);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
 clf 
 close all
-cd AlteredScripts
 
 
-% combined figures, outtarg, maxAxisOverride = 1
+
+% create axisLimit = 0.5 folder
+switch domain
+    case 'SD'
+        axisLimit = 0.5;
+    case 'TD'
+        axisLimit = 0.1;
+    case 'TDBySum'
+        axisLimit = 700;
+    otherwise
+        axisLimit = 0;
+end
+endsecondAxisLimitFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
+eval(['mkdir ',secondAxisLimitFolderString]);
+
+% combined figures, intarg, axisLimit = 0.5
 disp('...')
-disp(strcat('outtarg, max axis GC = ',num2str(maxAxisOverride)))
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_outtarg');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_outtarg');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_outtarg'));
-clf 
+disp(['intarg, max axis GC = ', axisLimit])
+saccFileString = inTarg_SaccFileString;
+targFileString = inTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(1);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
 close all
-cd AlteredScripts
 
-% combined figures, in-out, maxAxisOverride = 1
+% combined figures, outtarg, axisLimit = 0.5
 disp('...')
-disp(['in-out, max axis GC = ',num2str(maxAxisOverride)])
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_in-out');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_in-out');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_in-out'));
-clf 
+disp(['outtarg, max axis GC = ', axisLimit])
+saccFileString = outTarg_SaccFileString;
+targFileString = outTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(0);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
 close all
-cd AlteredScripts
 
-% create maxAxisOverride = 0.5 folder
-maxAxisOverride = 1000;
-eval(strcat('mkdir ../adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit'));
-
-% combined figures, intarg, maxAxisOverride = 0.5
+% combined figures, in-out, axisLimit = 0.5
 disp('...')
-disp(strcat('intarg, max axis GC = ',num2str(maxAxisOverride)))
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_intarg');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_intarg');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_intarg'));
-clf 
+disp(['in-out, max axis GC = ', axisLimit])
+saccFileString = inMinusOutTarg_SaccFileString;
+targFileString = inMinusOutTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(42);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
 close all
-cd AlteredScripts
-
-% combined figures, outtarg, maxAxisOverride = 0.5
-disp('...')
-disp(['outtarg, max axis GC = ',num2str(maxAxisOverride)])
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_outtarg');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_outtarg');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_outtarg'));
-clf 
-close all
-cd AlteredScripts
-
-% combined figures, in-out, maxAxisOverride = 0.5
-disp('...')
-disp(['in-out, max axis GC = ',num2str(maxAxisOverride)])
-saccFileString = strcat('2time_sacclfp_',monkey_Date,'_in-out');
-targFileString = strcat('2time_targlfp_',monkey_Date,'_in-out');
-plotForFigure_TimeDomain;
-cd ..
-saveas(figure(66), strcat('adamFigsAndData/Figure_Targ&SaccLFP/~timeDomain/',monkey_Date,'/',num2str(maxAxisOverride),'limit/2cond_in-out'));
-clf 
-close all
-cd AlteredScripts
-
