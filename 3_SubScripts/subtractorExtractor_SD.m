@@ -22,10 +22,10 @@ gc_out = gc;
 
 %% subtracting outtarg from intarg
 clear gc
-specGC = gc_in - gc_out;
+gc = gc_in - gc_out;
 
 %% plot GCs
-numVar = size(specGC,2);
+numVar = size(gc,2);
 
 maxGC = greatestMax(gc);
 
@@ -39,7 +39,7 @@ for i=1:numVar
     for j=1:numVar
         if i~=j
             subplot(numVar,numVar,(i-1)*numVar+j);
-            imagesc(time,freqs,squeeze(specGC(:,i,j,:))', [0, axisLimit]) % why do I need to transpose this?
+            imagesc(time,freqs,squeeze(gc(:,i,j,:))', [0, axisLimit]) % why do I need to transpose this?
             ylabel('Frequency (Hz)')
             axis xy
             axis([-inf, inf, 0, 50])
