@@ -7,6 +7,8 @@ switch inTargVal
         inTargString = 'outtarg';
     case 1
         inTargString = 'intarg';
+    case 42
+        inTargString = 'in-outtarg';
     otherwise
         inTargString = 'inAndOuttarg';
 end
