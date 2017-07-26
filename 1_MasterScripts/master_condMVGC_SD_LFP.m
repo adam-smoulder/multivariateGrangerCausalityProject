@@ -72,7 +72,7 @@ disp('saccade, outtarg')
 inTargVal = 0;
 inTargString = getInTargString(inTargVal);
 outTarg_SaccFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
-outTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+outTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',outTarg_SaccFolderName]);
 performMVGC;
 saveas(figure(66), [outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
@@ -83,8 +83,8 @@ save([outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
 % saccade, in - out
 disp('...')
 disp('saccade, in - out')
-inMinusOutTarg_SaccFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
-inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+inMinusOutTarg_SaccFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',inMinusOutTarg_SaccFolderString]);
 inTargFileString = [inTarg_SaccFolderName,'/',inTarg_SaccFileString];
 outTargFileString = [outTarg_SaccFolderName,'/',outTarg_SaccFileString];
@@ -103,7 +103,7 @@ cueString = getCueString(cueType,signalType);
 inTargVal = 1;
 inTargString = getInTargString(inTargVal);
 inTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
-inTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+inTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',inTarg_TargFolderName]);
 performMVGC;
 saveas(figure(66), [inTarg_TargFolderName,'/',inTarg_TargFileString]);
@@ -117,7 +117,7 @@ disp('target, outtarg')
 inTargVal = 0;
 inTargString = getInTargString(inTargVal);
 outTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
-outTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+outTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',outTarg_TargFolderName]);
 performMVGC;
 saveas(figure(66), [outTarg_TargFolderName,'/',outTarg_TargFileString]);
@@ -128,8 +128,8 @@ save([outTarg_TargFolderName,'/',outTarg_TargFileString]);
 % target, in - out
 disp('...')
 disp('target, in - out')
-inMinusOutTarg_TargFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
-inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
+inMinusOutTarg_TargFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',inMinusOutTarg_TargFolderString]);
 inTargFileString = [inTarg_TargFolderName,'/',inTarg_TargFileString];
 outTargFileString = [outTarg_TargFolderName,'/',outTarg_TargFileString];
@@ -154,7 +154,7 @@ switch domain
     otherwise
         axisLimit = 0;
 end
-firstAxisLimitFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
+firstAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
 eval(['mkdir ',firstAxisLimitFolderString]);
 
 % combined figures, intarg, axisLimit = 1
@@ -206,7 +206,7 @@ switch domain
     otherwise
         axisLimit = 0;
 end
-endsecondAxisLimitFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
+endsecondAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimit];
 eval(['mkdir ',secondAxisLimitFolderString]);
 
 % combined figures, intarg, axisLimit = 0.5
