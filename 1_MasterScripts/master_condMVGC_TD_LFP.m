@@ -27,7 +27,7 @@
 analysisType = 'cond';              % 'cond' = conditional, 'pw' = pairwise
 monkey_date = 'bb_sc_080415';       % experiment, used for saving
 signalType = 'lfp';                 % 'lfp' or 'spikes'
-domain = 'SD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
+domain = 'TD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
 channelsToUse = [1 3; 5 7; 9 11];   % superficial ; mid ; deep - change all depending on experiment
 demeanTrialAvg = 0;                 % 0 = do not demean data by trial avg, 1 = do so
 axisLimit = 0;                      % if 0, axisLimit = maxGC (only used for subtractorExtractor)
