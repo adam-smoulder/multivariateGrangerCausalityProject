@@ -1,214 +1,258 @@
-% Conditional Spectral-domain MVGC Spectrograms
-% Ignore commented variables and expressions
-tic;
+%% Conditional MVGC Spectral Domain combined script for LFP-LFP interactions
+% Last update: 7/26/17
 
-%% Parameters
-% Parameters that change between runs (with defaults)
-if exist('inTargVal', 'var') == 0       % if not defined
-    inTargVal = 1;                      % if 0, only inTarg = 0 used, if 1, only inTarg = 1 used, o/w all
-    disp(['inTargVal = ', num2str(inTargVal), ' press anything to continue'])
-    %pause();
-end
-if exist('cueString','var') == 0        % if not defined
-    cueString = 'sacclfp';              % string with sacc/targ/go + spike/lfp
-end
-if exist('channelsToUse','var') == 0    % if not defined
-    channelsToUse = [1 3; 5 7; 9 11];   % array with channel #s to use (sup. ; mid ; deep)
-end
-if exist('analysisType','var') == 0     % Conditional vs. pairwise analysis
-    analysisType = 'cond';              % use "cond" and "pw" respectively
-end
-if exist('domain','var') == 0           % Domain of MVGC; spectral, time, or time by sum (spectral domain summed over frequencies)
-    domain = 'SD';                      % use "SD", "TD", and "TDBySum" respectively
-end
-if exist('demeanTrialAvg','var') == 0   % flag for demeaning by trial avg (per channel)
-    demeanTrialAvg = 0;                 % if 1, will demean all data by trial avg
-end
+% TODO: automate enlarge of final figures and save as tif, clean up variables
 
-% Parameters that should not change between runs
-dnobs     = 0;          % initial observations to discard per trial - 0; we can ignore as needed
-regmode   = 'OLS';      % VAR model estimation regression mode ('OLS', 'LWR' or empty for default - 'OLS' ?
-nlags     = 50;         % number of lags in VAR model - ?
-dur       = 1;          % duration of trial (s) - 1
-fs        = 1000;       % sampling frequency (Hz) - 1000
-fres      = 8000;       % frequency resolution - 8000? Why is this so high? what is this?
-nvars     = 3;          % number of channels data that's being compared - 3 (superficial, mid, deep)
-pointsPerEval = 10;     % evaluate GC at every ev-th sample - 10 is pretty fair
-windowSize = 100;       % observation regression window size - 100ish
-modelOrder = 6;         % model order (for real-world data should be estimated) - ~6
-seed      = 0;          % random seed (0 for unseeded) - 0
+% To run this script, do the following:
+% startup MVGC
+% set channels to use accordingly
+% ensure you wish to run conditional MVGC in spectral domain
 
-nobs  = dur*fs+1;       % number of observations per trial
-tnobs = nobs+dnobs;     % total observations per trial for time series generation
-k = 1:tnobs;            % vector of time steps
-t = (k-dnobs-1)/fs;     % vector of times
-    
-% spikes = 0;                           % are inputs a spike train? 1 = yes, 0 = no
-% spikeDensityWind = 100;               % how many points per sum on spike density?
+% BAD channels by dataset (do NOT use these):
+% bb 031315: 11, 14
+% bb 070915: 2, 7, 11, 14
+% bb 071215: 11, 14
+% bb 080415: none
+% bl 031115: 2, 7, 11, 14
+% bl 071415: 2, 7, 11, 14
+% bl 072315_1: none
+% bl 072315_2: none
+% bl 112515: none
+
+% typically use [1 3; 5 7; 9 11] if none bad
+
+%% Setup
+
+% variables
+analysisType = 'cond';              % 'cond' = conditional, 'pw' = pairwise
+monkey_date = 'bb_sc_080415';       % experiment, used for saving
+signalType = 'lfp';                 % 'lfp' or 'spikes'
+domain = 'SD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
+channelsToUse = [1 3; 5 7; 9 11];   % superficial ; mid ; deep - change all depending on experiment
+demeanTrialAvg = 0;                 % 0 = do not demean data by trial avg, 1 = do so
+axisLimit = 0;                      % if 0, axisLimit = maxGC (only used for subtractorExtractor)
+
+% add file paths (only run within 1_MasterScripts folder)
+cd .. % you are now located in Project folder after this line!!!
+projectRoot = pwd;
+addpath(genpath(projectRoot)); % adds all needed scripts/functions to file path
+demeaned = ternaryOp(demeanTrialAvg, '_demeaned','');
+
+clc % make sure you're clear before pulling the trigger!
+disp('Check data is clear (or properly loaded) and filenames are clear! (press any key to cont.)')
+pause();
+if exist('data','var') == 0
+    load(['4_Data/',monkey_date,'_mcell_spikelfp_cSC']);
+end
+disp('Check channels are correct! (press any key to cont.)')
+pause();
+ 
+%% MVGC to get SD GC for intarg, outtarg, and in-out for sacc and targ
+
+% saccade, intarg
+disp('...')
+disp('saccade, intarg')
+cueType = 'saccade';
+cueString = getCueString(cueType,signalType); % used by MVGC scripts
+
+inTargVal = 1;
+inTargString = getInTargString(inTargVal);
+inTarg_SaccFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',inTarg_SaccFolderName]);
+performMVGC;
+saveas(figure(66), [inTarg_SaccFolderName,'/',inTarg_SaccFileString]);
+clf 
+close all
+save([inTarg_SaccFolderName,'/',inTarg_SaccFileString]);
+
+% saccade, outtarg
+disp('...')
+disp('saccade, outtarg')
+inTargVal = 0;
+inTargString = getInTargString(inTargVal);
+outTarg_SaccFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+outTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',outTarg_SaccFolderName]);
+performMVGC;
+saveas(figure(66), [outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
+clf 
+close all
+save([outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
+
+% saccade, in - out
+disp('...')
+disp('saccade, in - out')
+inTargVal = 42;
+inTargString = getInTargString(inTargVal);
+inMinusOutTarg_SaccFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',inMinusOutTarg_SaccFolderString]);
+inTargFileString = [inTarg_SaccFolderName,'/',inTarg_SaccFileString];
+outTargFileString = [outTarg_SaccFolderName,'/',outTarg_SaccFileString];
+performGCSubtraction;
+saveas(figure(66), [inMinusOutTarg_SaccFolderString,'/',inMinusOutTarg_SaccFileString]); % save figure
+clf
+close all
+save([inMinusOutTarg_SaccFolderString,'/',inMinusOutTarg_SaccFileString]); % save data
+
+% target, intarg
+disp('...')
+disp('target, intarg')
+cueType = 'target';
+cueString = getCueString(cueType,signalType);
+
+inTargVal = 1;
+inTargString = getInTargString(inTargVal);
+inTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',inTarg_TargFolderName]);
+performMVGC;
+saveas(figure(66), [inTarg_TargFolderName,'/',inTarg_TargFileString]);
+clf 
+close all
+save([inTarg_TargFolderName,'/',inTarg_TargFileString]);
+
+% target, outtarg
+disp('...')
+disp('target, outtarg')
+inTargVal = 0;
+inTargString = getInTargString(inTargVal);
+outTarg_TargFolderName = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+outTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',outTarg_TargFolderName]);
+performMVGC;
+saveas(figure(66), [outTarg_TargFolderName,'/',outTarg_TargFileString]);
+clf 
+close all
+save([outTarg_TargFolderName,'/',outTarg_TargFileString]);
+
+% target, in - out
+disp('...')
+disp('target, in - out')
+inTargVal = 42;
+inTargString = getInTargString(inTargVal);
+inMinusOutTarg_TargFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
+inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
+eval(['mkdir ',inMinusOutTarg_TargFolderString]);
+inTargFileString = [inTarg_TargFolderName,'/',inTarg_TargFileString];
+outTargFileString = [outTarg_TargFolderName,'/',outTarg_TargFileString];
+performGCSubtraction;
+saveas(figure(66), [inMinusOutTarg_TargFolderString,'/',inMinusOutTarg_TargFileString]);
+clf 
+close all
+save([inMinusOutTarg_TargFolderString,'/',inMinusOutTarg_TargFileString]);
 
 
-%% Isolate desired data
-% produces variable X, which is what will be used for MVGC
-
-% inTarg = 0 -> out of target, inTarg = 1 -> in target, otherwise -> all
-switch inTargVal
-    case 0
-        dataToUse = data([data.inTarg] == 0);
-    case 1
-        dataToUse = data([data.inTarg] == 1);
+%% Combined figure plots
+% make folders for combined figures, axisLimit = 1
+disp('...')
+disp('Plot for figures')
+switch domain
+    case 'SD'
+        axisLimit = 1;
+        axisLimitString = '1';
+    case 'TD'
+        axisLimit = 0.2;
+        axisLimitString = '0p2';
+    case 'TDBySum'
+        axisLimit = 1500;
+        axisLimitString = '1500';
     otherwise
-        dataToUse = data;
+        axisLimit = 0;
+        axisLimitString = '0';
 end
-    
-% disp(['spikes = ', num2str(spikes),' press anything to continue'])
+firstAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimitString];
+eval(['mkdir ',firstAxisLimitFolderString]);
 
-% sort channels from default to align with indexes (CHANGE CUE IN HERE)
-sortedData = zeros(16, tnobs, length(dataToUse)); % dims: channel, time, trial
-for trial = 1:length(dataToUse)
-    trialData = dataToUse(trial);
-    for i=1:length(trialData.channelOrder)
-        sortedData(trialData.channelOrder(i),:,trial) = trialData.targlfpmat(i,:); % (CHANGE LFPvsSPIKE CUE HERE)
-        eval(strcat('sortedData(trialData.channelOrder(i),:,trial) = trialData.', cueString, 'mat(i,:);'));
-    end
+% combined figures, intarg, axisLimit = 1
+disp('...')
+disp(['intarg, max axis GC = ', axisLimitString])
+saccFileString = inTarg_SaccFileString; % Or whatever the name is in the script
+targFileString = inTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(1);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+clf
+close all
+
+% combined figures, outtarg, axisLimit = 1
+disp('...')
+disp(['outtarg, max axis GC = ', axisLimitString])
+saccFileString = outTarg_SaccFileString;
+targFileString = outTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(0);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+clf
+close all
+
+% combined figures, in-out, axisLimit = 1
+disp('...')
+disp(['in-out, max axis GC = ', axisLimitString])
+saccFileString = inMinusOutTarg_SaccFileString;
+targFileString = inMinusOutTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(42);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+clf 
+close all
+
+
+
+% create axisLimit = 0.5 folder
+switch domain
+    case 'SD'
+        axisLimit = 0.5;
+        axisLimitString = '0p5';
+    case 'TD'
+        axisLimit = 0.1;
+        axisLimitString = '0p1';
+    case 'TDBySum'
+        axisLimit = 700;
+        axisLimitString = '700';
+    otherwise
+        axisLimit = 0;
+        axisLimitString = '0';
 end
+secondAxisLimitFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimitString];
+eval(['mkdir ',secondAxisLimitFolderString]);
 
-% % convert spikes to spike density
-% if spikes == 1
-%     for i = 1:16
-%         sortedData(i,:,:) = movsum(squeeze(sortedData(i,:,:)),spikeDensityWind);
-%     end
-% end
+% combined figures, intarg, axisLimit = 0.5
+disp('...')
+disp(['intarg, max axis GC = ', axisLimitString])
+saccFileString = inTarg_SaccFileString;
+targFileString = inTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(1);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
+close all
 
-if demeanTrialAvg
-    sortedData = sortedData - repmat(mean(sortedData,3),1,1,size(sortedData,3));
-end
+% combined figures, outtarg, axisLimit = 0.5
+disp('...')
+disp(['outtarg, max axis GC = ', axisLimitString])
+saccFileString = outTarg_SaccFileString;
+targFileString = outTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(0);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
+close all
 
-% isolate data desired to be analyzed (subtracting is removing bias from
-% voltage reference)
-% for superficial, mid, and deep SC
-X = zeros(3,1001, length(dataToUse));  % dims: depth (channel), time, trial
-X(1,:,:) = squeeze(sortedData(channelsToUse(1,1),:,:) - sortedData(channelsToUse(1,2),:,:));
-X(2,:,:) = squeeze(sortedData(channelsToUse(2,1),:,:) - sortedData(channelsToUse(2,2),:,:));
-X(3,:,:) = squeeze(sortedData(channelsToUse(3,1),:,:) - sortedData(channelsToUse(3,2),:,:));
-
-%% "Vertical" regression GC calculation
-
-wnobs = modelOrder+windowSize;                  % number of observations in "vertical slice"
-evalPoints = wnobs : pointsPerEval : nobs;      % GC evaluation points
-enobs = length(evalPoints);                     % number of GC evaluations
-nBins = fres+1;                                 % found mostly experimentally...
-stepsize = (fs/2)/nBins;                        % max frequency is fs/2 (Nyquist)
-freqs = 0:stepsize:(fs/2)-stepsize;             % frequency values
-badCalcs = zeros(1,enobs);                      % record where calculations fail
-if strcmp('SD',domain)
-    gc = nan(enobs,nvars,nvars,fs/2);           % dims:  time, eq1, eq2, freq
-elseif strcmp('TD',domain)
-    gc = nan(nvars, nvars, enobs);              % dims:  eq1, eq2, time
-elseif strcmp('TDBySum',domain)
-    specGC = nan(enobs,nvars,nvars,fs/2);       % dims:  time, eq1, eq2, freq
-    gc = nan(nvars, nvars, enobs);              % dims:  eq1, eq2, time
-end
-
-% loop through evaluation points
-for e = 1:enobs
-    j = evalPoints(e);
-    fprintf('window %d of %d at time = %d',e,enobs,j);
-
-    % convert time series data in window to VAR
-    [A,SIG] = tsdata_to_var(X(:,j-wnobs+1:j,:),modelOrder,regmode);
-    if isbad(A)
-        fprintf(2,' *** skipping - VAR estimation failed\n');
-        badCalcs(e) = 1;
-        continue
-    end
-
-    % calculate autocovariance from VAR
-    [G,info] = var_to_autocov(A,SIG);
-    if info.error
-        fprintf(2,' *** skipping - bad VAR (%s)\n',info.errmsg);
-        badCalcs(e) = 1;
-        continue
-    end
-    if info.aclags < info.acminlags % warn if number of autocov lags is too small (not a show-stopper)
-        fprintf(2,' *** WARNING: minimum %d lags required (decay factor = %e)',info.acminlags,realpow(info.rho,info.aclags));
-        badCalcs(e) = 1;
-    end
-
-    
-    % Calculate GC for window
-    if strcmp('SD',domain) && strcmp('cond',analysisType)
-        a  = autocov_to_spwcgc(G,fres);
-        gc(e,:,:,1:size(a,3)) = a;
-    elseif strcmp('TD',domain) && strcmp('cond',analysisType)
-        gc(:,:,e) = autocov_to_pwcgc(G);
-    elseif strcmp('TDBySum',domain) && strcmp('cond',analysisType)
-        a  = autocov_to_spwcgc(G,fres);
-        specGC(e,:,:,1:size(a,3)) = a;
-        gc(:,:,e) = squeeze(sum(specGC(e,:,:,:),4));
-    elseif strcmp('SD',domain) && strcmp('pw',analysisType)
-        for count1 = 1:nvars   % for each pairwise GC we need to do...
-            for count2 = count1:nvars
-                clear PWAutoCov
-                % isolating each interaction to find pairwise GCs
-                if count1 ~= count2
-                    PWAutoCov(1,1,:) = G(count1,count1,:);
-                    PWAutoCov(1,2,:) = G(count1,count2,:);
-                    PWAutoCov(2,1,:) = G(count2,count1,:);
-                    PWAutoCov(2,2,:) = G(count2,count2,:);
-                    b = autocov_to_spwcgc(PWAutoCov,fres);
-                    gc(e,count1,count2,1:size(b,3)) = b(1,2,:);
-                    gc(e,count2,count1,1:size(b,3)) = b(2,1,:);
-                end
-            end
-        end
-    end
-    
-    if isbad(gc,false)
-        fprintf(2,' *** skipping - GC calculation failed\n');
-        badCalcs(e) = 1;
-        continue
-    end 
-    
-    fprintf('\n');
-end
-
-%% plot GCs
-time = t(dnobs+1:end);
-numVar = size(gc,2);
-maxgc = greatestMax(gc);
-
-figure(66)
-for i=1:numVar
-    for j=1:numVar
-        if i~=j
-            subplot(numVar,numVar,(i-1)*numVar+j);
-            if strcmp(domain,'SD')
-                imagesc(time,freqs,squeeze(gc(:,i,j,:))', [0, maxgc]) % why do I need to invert this?
-                ylabel('Frequency (Hz)')
-                axis xy
-                axis([-inf, inf, 0, 50])
-                colormap jet
-                set(gca, 'CLim', [0,maxgc]);
-            elseif strcmp(domain,'TD') || strcmp(domain,'TDBySum')
-                subplot(numVar,numVar,(i-1)*numVar+j);
-                plot(time,squeeze(timeGC(i,j,:)), 'LineWidth', 3) % why do I need to invert this?
-                ylabel('Granger Causality')
-                axis xy
-                axis([-inf, inf, 0, 1.2*maxgc])
-            end
-        end
-    end
-end
-
-% for reference
-subplot(numVar, numVar, numVar^2)
-if strcmp(domain, 'SD')
-    set(gca, 'CLim', [0,maxgc]);
-    c = colorbar;
-    c.Label.String = 'GC';
-    colorbar
-end
-title(['intarg = ' num2str(inTargVal)])
-xlabel(['Max GC = ' num2str(maxgc) '      points/eval = ' num2str(pointsPerEval)])
-% ylabel(['Spikes? ' num2str(spikes) '  spikeWind ' num2str(spikeDensityWind)])
-toc
+% combined figures, in-out, axisLimit = 0.5
+disp('...')
+disp(['in-out, max axis GC = ', axisLimitString])
+saccFileString = inMinusOutTarg_SaccFileString;
+targFileString = inMinusOutTarg_TargFileString;
+performCombinedPlot;
+inTargString = getInTargString(42);
+fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+clf
+close all
