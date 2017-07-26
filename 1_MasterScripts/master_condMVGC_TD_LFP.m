@@ -27,7 +27,7 @@
 analysisType = 'cond';              % 'cond' = conditional, 'pw' = pairwise
 monkey_date = 'bb_sc_080415';       % experiment, used for saving
 signalType = 'lfp';                 % 'lfp' or 'spikes'
-domain = 'TD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
+domain = 'SD';                      % 'SD' = spectral, 'TD' = time domain, 'TDbySum' = spectral then sum over frequencies
 channelsToUse = [1 3; 5 7; 9 11];   % superficial ; mid ; deep - change all depending on experiment
 demeanTrialAvg = 0;                 % 0 = do not demean data by trial avg, 1 = do so
 axisLimit = 0;                      % if 0, axisLimit = maxGC (only used for subtractorExtractor)
@@ -86,8 +86,8 @@ disp('saccade, in - out')
 inMinusOutTarg_SaccFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
 inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
 eval(['mkdir ',inMinusOutTarg_SaccFolderString]);
-inTargFileString = [inTarg_SaccFolderName,'/',inTarg_SaccFileString,'.mat'];
-outTargFileString = [outTarg_SaccFolderName,'/',outTarg_SaccFileString,'.mat'];
+inTargFileString = [inTarg_SaccFolderName,'/',inTarg_SaccFileString];
+outTargFileString = [outTarg_SaccFolderName,'/',outTarg_SaccFileString];
 performGCSubtraction;
 saveas(figure(66), [inMinusOutTarg_SaccFolderString,'/',inMinusOutTarg_SaccFileString]); % save figure
 clf
@@ -131,8 +131,8 @@ disp('target, in - out')
 inMinusOutTarg_TargFolderString = [projectRoot,'FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
 inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned];
 eval(['mkdir ',inMinusOutTarg_TargFolderString]);
-inTargFileString = [inTarg_TargFolderName,'/',inTarg_TargFileString,'.mat'];
-outTargFileString = [outTarg_TargFolderName,'/',outTarg_TargFileString,'.mat'];
+inTargFileString = [inTarg_TargFolderName,'/',inTarg_TargFileString];
+outTargFileString = [outTarg_TargFolderName,'/',outTarg_TargFileString];
 performGCSubtraction;
 saveas(figure(66), [inMinusOutTarg_TargFolderString,'/',inMinusOutTarg_TargFileString]);
 clf 
