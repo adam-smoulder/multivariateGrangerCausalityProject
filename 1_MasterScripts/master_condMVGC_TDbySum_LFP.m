@@ -83,6 +83,8 @@ save([outTarg_SaccFolderName,'/',outTarg_SaccFileString]);
 % saccade, in - out
 disp('...')
 disp('saccade, in - out')
+inTargVal = 42;
+inTargString = getInTargString(inTargVal);
 inMinusOutTarg_SaccFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
 inMinusOutTarg_SaccFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',inMinusOutTarg_SaccFolderString]);
@@ -128,6 +130,8 @@ save([outTarg_TargFolderName,'/',outTarg_TargFileString]);
 % target, in - out
 disp('...')
 disp('target, in - out')
+inTargVal = 42;
+inTargString = getInTargString(inTargVal);
 inMinusOutTarg_TargFolderString = ['FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType];
 inMinusOutTarg_TargFileString = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,demeaned];
 eval(['mkdir ',inMinusOutTarg_TargFolderString]);
