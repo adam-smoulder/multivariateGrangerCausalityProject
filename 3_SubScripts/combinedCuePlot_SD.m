@@ -26,7 +26,7 @@ targMax = greatestMax(specGC_targ);
 
 numVar = size(specGC_targ,2);
 
-maxGC = max([specMax targMax]);
+maxGC = max([saccMax targMax]);
 if axisLimit == 0
     colorbarMax = maxGC;
 end
