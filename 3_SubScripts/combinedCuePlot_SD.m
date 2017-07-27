@@ -131,3 +131,8 @@ for i = 1:numVar
         hold off
     end
 end
+
+% maximize figure
+figHandle = gcf;
+jFrame = get(handle(figHandle), 'JavaFrame');
+jFrame.setMaximized(1);
