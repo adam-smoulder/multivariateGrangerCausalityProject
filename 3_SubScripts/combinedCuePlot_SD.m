@@ -1,5 +1,7 @@
 %% Plots figures for spwcmvgc
 
+addpath(genpath(projectRoot)); % adds all needed scripts/functions to file path
+
 % maximum GC-axis value; if 0, defaults to max GC value of target event
 if exist('axisLimit','var') == 0
     axisLimit = 0;
