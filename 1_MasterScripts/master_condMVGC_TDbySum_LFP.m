@@ -1,8 +1,6 @@
 %% Conditional MVGC Spectral Domain combined script for LFP-LFP interactions
 % Last update: 7/27/17
 
-% TODO: automate enlarge of final figures and save as tif, clean up variables
-
 % To run this script, do the following:
 % startup MVGC
 % set channels to use accordingly
