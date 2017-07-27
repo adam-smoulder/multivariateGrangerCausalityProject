@@ -1,0 +1,47 @@
+----------------TODO-------------------
+need to update existing scripts to be standardized:
+- Master Scripts
+	- possibly update to config files of sorts? make "smarter"
+	- implement PW script properly
+- MVGC scripts
+	- test for all scenarios
+	- implement PW script properly
+- subscripts
+	-rename subtractor extractor to something better...
+	-combine TD and SD for subtractorExtractor and combinedCuePlot
+	-test
+	
+OVERALL:
+ Default file names need updated
+
+
+-----------------INFO------------------
+
+Use new file name and folder structure, rerun existing stuff:
+
+projectRoot = project folder location
+analysisType = 'cond' or 'pw'
+monkey_date = 'bb_150804' or whatever
+domain = 'SD', 'TD', or 'TDbySum'
+signalType = 'lfp' or 'spike'
+cueType = 'saccade', 'go', or 'target'
+cueString = 'sacc', 'targ', 'go'
+inTargString = 'intarg', 'outtarg', 'in-out', 'inAndOuttarg'
+axisLimit = number of the max GC value shown on plots
+axisLimitString = conversion to filename-friendly string for axisLimit
+
+
+for main MVGC data and figures + subtractor extractor:
+
+folder name:
+strcat(projectRoot,'/FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/IndividualCues/',cueType)
+file name:
+strcat(analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',cueType,'_',inTargString,'_',demeaned,axisLimitString) % (only use axis limit if in fig)
+
+for combined cue figures:
+folder name:
+strcat(projectRoot,'/FiguresAndResults/',analysisType,'/',monkey_date,'/',domain,'/',signalType,'/CombinedCues/',axisLimitString)
+file name:
+strcat(analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimit);
+
+
