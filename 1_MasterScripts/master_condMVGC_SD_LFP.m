@@ -174,6 +174,7 @@ performCombinedPlot;
 inTargString = getInTargString(1);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName], 'tif');
 clf
 close all
 
@@ -186,6 +187,7 @@ performCombinedPlot;
 inTargString = getInTargString(0);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName], 'tif');
 clf
 close all
 
@@ -198,6 +200,7 @@ performCombinedPlot;
 inTargString = getInTargString(42);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [firstAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [firstAxisLimitFolderString,'/',fileName], 'tif');
 clf 
 close all
 
@@ -230,6 +233,7 @@ performCombinedPlot;
 inTargString = getInTargString(1);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName], 'tif');
 clf
 close all
 
@@ -242,6 +246,7 @@ performCombinedPlot;
 inTargString = getInTargString(0);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName], 'tif');
 clf
 close all
 
@@ -254,5 +259,6 @@ performCombinedPlot;
 inTargString = getInTargString(42);
 fileName = [analysisType,'_',monkey_date,'_',domain,'_',signalType,'_',inTargString,'_',demeaned,axisLimitString];
 saveas(figure(66), [secondAxisLimitFolderString,'/',fileName]);
+saveas(figure(66), [secondAxisLimitFolderString,'/',fileName], 'tif');
 clf
 close all
