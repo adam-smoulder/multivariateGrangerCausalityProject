@@ -1,9 +1,8 @@
-% subtractorExtractor_TimeDomain:
+% subtractorExtractor for Time Domain:
 % - save .mat for intarg = 1 (intarg) and intarg = 0 files from MVGC
 % - load paths to these files
 % - run this file!
 
-% ADAM UPDATE THIS SO THAT IT WORKS WITH THE NEW STUFF!!!!
 %% load data
 if exist('inTargFileString','var') == 0
     inTargFileString = 'time_sacclfp_bb_080415_intarg'; % these will need updated
